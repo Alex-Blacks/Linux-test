@@ -296,18 +296,74 @@ netstat - отображает сетевую статистику
 
 ifconfig\ip addr show - показывает сетевые характеристики моего компа
 
-rout - показывает информацию по используемым роутерам
+rout - показывает информацию по используемым маршрутам
+
+sudo route add -net 192.168.2.1/23 gw 10.11.12.3 - Добавить новый маршрут
+
+sudo route del -net 192.168.2.1/23 - Удалить маршрут
+
+ip route add 192.168.2.1/23 via 10.11.12.3 - Чтобы добавить маршрут через ip
+
+ip route delete 192.168.2.1/23 via 10.11.12.3 - Чтобы удалить маршрут через ip
 
 ssh - подключение по ssh
 
 sudo ufw allow 22 - открытие порта 22
 
+scp myfile.txt username@remotehost.com:/remote/directory - Чтобы скопировать файл с локального хоста на удаленный хост
 
+scp username@remotehost.com:/remote/directory/myfile.txt /local/directory - Чтобы скопировать файл с удаленного хоста на локальный хост
 
+scp -r mydir username@remotehost.com:/remote/directory - Чтобы скопировать каталог с локального хоста на удаленный хост
 
+rsync -zvr /my/local/directory/one /my/local/directory/two - Копирование/синхронизация файлов на одном хосте
 
+rsync /local/directory username@remotehost.com:/remote/directory - Копирование/синхронизация файлов на локальный хост с удаленного хоста
 
+rsync username@remotehost.com:/remote/directory /local/directory - Копирование/синхронизация файлов на удаленный хост с локального хоста
 
+        "v" - подробный вывод        
+        "r" - рекурсивный обход каталогов        
+        "h" - вывод в удобочитаемом формате        
+        "z" - сжатие для более легкой передачи, отлично подходит для медленных соединений
 
+python -m http.server - настраивает базовый веб-сервер, к которому вы можете получить доступ через адрес localhost. На другой машине доступ к нему в браузере с помощью: http://IP_ADDRESS:8000
 
+sudo service nfsclient start - Запуск NFS клиента
+
+sudo mount server:/directory /mount_directory  Настройка NFS клиента
+
+sudo apt install samba - установка samba
+
+sudo smbpasswd -a [username] - Установка пароля для Samba
+
+mkdir /my/directory/to/share - Создание общей директории
+
+sudo service smbd restart - Перезапуск службы Samba
+
+smbclient //HOST/directory -U user - Доступ к общей папке Samba/Windows через Linux
+
+sudo mount -t cifs servername:directory mountpoint -o user=username,pass=password - Подключение общей папки Samba к системе
+
+ifconfig eth0 192.168.2.1 netmask 255.255.255.0 up - Чтобы создать интерфейс и поднять его
+
+ip link show - Чтобы показать информацию об интерфейсе для всех интерфейсов
+
+ip -s link show eth0 - Чтобы показать статистику интерфейса
+
+ip address show - Чтобы показать IP-адреса, назначенные интерфейсам
+
+ip link set eth0 up/down - Чтобы поднять и опустить интерфейсы
+
+ip address add 192.168.1.1/24 dev eth0 - Чтобы добавить IP-адрес к интерфейсу
+
+sudo dhclient - Для получения нового IP-адреса DHCP
+
+nm-tool - сообщает о состоянии NetworkManager и его устройств
+
+nmcli - позволяет управлять и изменять NetworkManager
+
+arp - показывает локально сохраненный ARP-кэш в системе
+
+ip neighbour show - ARP-кэш через ip
 
