@@ -428,9 +428,15 @@ python -m http.server - настраивает базовый веб-серве�
 SSH
 ---
 
-ssh - подключение по ssh
+ssh user@192.168.1.1 — стандартное подключение от имени пользователя user к серверу с указанным IP-адресом (или доменом)
 
+ssh -p 2222 user@192.168.1.1 — подключение к серверу, если SSH работает на нестандартном порту (например, 2222).
 
+ssh -i ~/.ssh/my_key user@192.168.1.1 — подключение с указанием конкретного файла приватного ключа.
+
+ssh -L 8080:localhost:80 user@192.168.1.1 — локальный проброс. Позволяет открыть на вашем ПК сайт или базу данных, которые доступны только внутри сервера (вы обращаетесь к localhost:8080, а трафик идет на 80-й порт сервера).
+
+ssh -D 1080 user@192.168.1.1 — создание локального SOCKS5-прокси на порту 1080 для пропуска трафика браузера или программ через сервер.0
 
 SCP
 ---
@@ -440,12 +446,14 @@ scp username@remotehost.com:/remote/directory/myfile.txt /local/directory - Чт
 
 scp -r mydir username@remotehost.com:/remote/directory - Чтобы скопировать каталог с локального хоста на удаленный хост
 
+       "r" - рекурсивно
+
 NFC
 ---
 
 sudo service nfsclient start - Запуск NFS клиента
 
-sudo mount server:/directory /mount_directory  Настройка NFS клиента
+sudo mount server:/directory /mount_directory - Настройка NFS клиента
 
 Samba
 ---
