@@ -300,6 +300,7 @@ $ - "by$" - выводит строку, которая заканчиваетс
 -----------------------------------------------------------------------------------------
 Работа с дисками
 -----------------------------------------------------------------------------------------
+
 sudo parted - инструмент командной строки, который поддерживает разбиение как MBR, так и GPT
 
 select /dev/sdb2 - выбор устройства
@@ -381,44 +382,7 @@ ip route add 192.168.2.1/23 via 10.11.12.3 - Чтобы добавить мар�
 
 ip route delete 192.168.2.1/23 via 10.11.12.3 - Чтобы удалить маршрут через ip
 
-ssh - подключение по ssh
-
 sudo ufw allow 22 - открытие порта 22
-
-scp myfile.txt username@remotehost.com:/remote/directory - Чтобы скопировать файл с локального хоста на удаленный хост
-
-scp username@remotehost.com:/remote/directory/myfile.txt /local/directory - Чтобы скопировать файл с удаленного хоста на локальный хост
-
-scp -r mydir username@remotehost.com:/remote/directory - Чтобы скопировать каталог с локального хоста на удаленный хост
-
-rsync -zvr /my/local/directory/one /my/local/directory/two - Копирование/синхронизация файлов на одном хосте
-
-rsync /local/directory username@remotehost.com:/remote/directory - Копирование/синхронизация файлов на локальный хост с удаленного хоста
-
-rsync username@remotehost.com:/remote/directory /local/directory - Копирование/синхронизация файлов на удаленный хост с локального хоста
-
-        "v" - подробный вывод        
-        "r" - рекурсивный обход каталогов        
-        "h" - вывод в удобочитаемом формате        
-        "z" - сжатие для более легкой передачи, отлично подходит для медленных соединений
-
-python -m http.server - настраивает базовый веб-сервер, к которому вы можете получить доступ через адрес localhost. На другой машине доступ к нему в браузере с помощью: http://IP_ADDRESS:8000
-
-sudo service nfsclient start - Запуск NFS клиента
-
-sudo mount server:/directory /mount_directory  Настройка NFS клиента
-
-sudo apt install samba - установка samba
-
-sudo smbpasswd -a [username] - Установка пароля для Samba
-
-mkdir /my/directory/to/share - Создание общей директории
-
-sudo service smbd restart - Перезапуск службы Samba
-
-smbclient //HOST/directory -U user - Доступ к общей папке Samba/Windows через Linux
-
-sudo mount -t cifs servername:directory mountpoint -o user=username,pass=password - Подключение общей папки Samba к системе
 
 ifconfig eth0 192.168.2.1 netmask 255.255.255.0 up - Чтобы создать интерфейс и поднять его
 
@@ -447,4 +411,54 @@ sudo tcpdump -i wlan0 - Захват данных пакетов на интер
 sudo tcpdump -w /some/file - Запись вывода tcpdump в файл
 
 dig - мощный инструмент для получения информации о DNS-серверах имен
+
+rsync -zvr /my/local/directory/one /my/local/directory/two - Копирование/синхронизация файлов на одном хосте
+
+rsync /local/directory username@remotehost.com:/remote/directory - Копирование/синхронизация файлов на локальный хост с удаленного хоста
+
+rsync username@remotehost.com:/remote/directory /local/directory - Копирование/синхронизация файлов на удаленный хост с локального хоста
+
+        "v" - подробный вывод        
+        "r" - рекурсивный обход каталогов        
+        "h" - вывод в удобочитаемом формате        
+        "z" - сжатие для более легкой передачи, отлично подходит для медленных соединений
+
+python -m http.server - настраивает базовый веб-сервер, к которому вы можете получить доступ через адрес localhost. На другой машине доступ к нему в браузере с помощью: http://IP_ADDRESS:8000
+
+SSH
+---
+
+ssh - подключение по ssh
+
+
+
+SCP
+---
+scp myfile.txt username@remotehost.com:/remote/directory - Чтобы скопировать файл с локального хоста на удаленный хост
+
+scp username@remotehost.com:/remote/directory/myfile.txt /local/directory - Чтобы скопировать файл с удаленного хоста на локальный хост
+
+scp -r mydir username@remotehost.com:/remote/directory - Чтобы скопировать каталог с локального хоста на удаленный хост
+
+NFC
+---
+
+sudo service nfsclient start - Запуск NFS клиента
+
+sudo mount server:/directory /mount_directory  Настройка NFS клиента
+
+Samba
+---
+
+sudo apt install samba - установка samba
+
+sudo smbpasswd -a [username] - Установка пароля для Samba
+
+mkdir /my/directory/to/share - Создание общей директории
+
+sudo service smbd restart - Перезапуск службы Samba
+
+smbclient //HOST/directory -U user - Доступ к общей папке Samba/Windows через Linux
+
+sudo mount -t cifs servername:directory mountpoint -o user=username,pass=password - Подключение общей папки Samba к системе
 
