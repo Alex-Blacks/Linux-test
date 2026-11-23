@@ -427,6 +427,52 @@ rsync username@remotehost.com:/remote/directory /local/directory - Копиро�
 
 python -m http.server - настраивает базовый веб-сервер, к которому вы можете получить доступ через адрес localhost. На другой машине доступ к нему в браузере с помощью: http://IP_ADDRESS:8000
 
+SSL / TLS и сертификаты (OpenSSL)
+---
+```bash
+openssl req -x509 -newkey rsa:2048 -nodes \ 
+        -keyout server.key \
+        -out server.crt \ 
+        -days 365 \
+        -subj "/CN=192.168.37.131" \
+        -addext "subjectAltName = IP:192.168.37.131,DNS:localhost" - Создать сертификат и приватный ключ одной командой (с поддержкой IP и доменов через SAN)
+```
+        "-nodes" — сохранить приватный ключ без пароля (чтобы веб-сервер не запрашивал его при перезапуске).
+        "-addext" — обязательно для современных браузеров и клиентов, без SAN сертификат для IP не примут.
+```bash
+openssl req -new -newkey rsa:2048 -nodes \
+        -keyout domain.key \
+        -out domain.csr \
+        -subj "/C=RU/ST=Moscow/L=Moscow/O=MyCompany/CN=example.com" - Создать запрос на подпись сертификата (CSR) и ключ для отправки в Центр сертификации (CA)
+```
+openssl x509 -in server.crt -text -noout - Посмотреть всю информацию о сертификате (срок действия, кому выдан, SAN)
+
+openssl x509 -in server.crt -noout -dates - Проверить только даты начала и окончания действия сертификата
+
+openssl rsa -in server.key -check -noout - Проверить приватный ключ на корректность
+
+openssl x509 -noout -modulus -in server.crt | openssl md5 - Убедиться, что сертификат и приватный ключ подходят друг к другу (хеши должны совпасть)
+openssl rsa -noout -modulus -in server.key | openssl md5 - Убедиться, что сертификат и приватный ключ подходят друг к другу (хеши должны совпасть)
+
+openssl s_client -connect 192.168.37.131:443 -servername 192.168.37.131 </dev/null - Подключиться к серверу и посмотреть цепочку сертификатов и параметры TLS
+
+echo | openssl s_client -servername example.com -connect example.com:443 2>/dev/null | openssl x509 -noout -dates - Узнать дату истечения сертификата на удаленном сайте
+
+curl --cacert /etc/nginx/ssl/server.crt https://192.168.37 - Проверить API через `curl` с указанием своего самоподписного сертификата
+
+curl -k https://192.168.37 - Проверить API через `curl`, игнорируя ошибки сертификата
+
+openssl pkcs12 -export -out bundle.pfx -inkey server.key -in server.crt - Собрать сертификат и ключ в единый контейнер `.pfx` / `.p12` (для Windows, IIS, Java)
+
+openssl pkcs12 -in bundle.pfx -clcerts -nokeys -out server.crt && openssl pkcs12 -in bundle.pfx -nocerts -nodes -out server.key - Извлечь сертификат и приватный ключ из `.pfx` обратно в PEM
+
+openssl x509 -inform der -in certificate.der -out certificate.crt - Конвертировать бинарный `.der` в текстовый `.pem` (`.crt`)
+
+sudo cp server.crt /usr/local/share/ca-certificates/my-server.crt && sudo update-ca-certificates - Добавить свой сертификат в доверенные на уровне всей системы (Ubuntu/Debian)
+        
+        *(Примечание: файл в `/usr/local/share/ca-certificates/` обязательно должен иметь расширение `.crt`).*
+
+
 SSH
 ---
 
@@ -484,7 +530,7 @@ sudo nft list set inet custom_firewall blacklist_v4 - Посмотреть сп�
 
 sudo journalctl -k -n 0 -f | grep "NFT_" - Читать логи срабатываний в реальном времени
 
-*Внимание: изменения через `add`/`delete` работают сразу в памяти, но пропадут после перезагрузки, если не вписать их в `/etc/nftables.conf`.*
+        *Внимание: изменения через `add`/`delete` работают сразу в памяти, но пропадут после перезагрузки, если не вписать их в `/etc/nftables.conf`.*
 
 sudo nft add element inet custom_firewall blacklist_v4 { 198.51.100.14 timeout 1h } - Забанить IP-адрес вручную (например, на 1 час)
 
