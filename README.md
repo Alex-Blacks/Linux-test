@@ -462,6 +462,95 @@ ssh -D 1080 user@192.168.1.1 — создание локального SOCKS5-п
                 
         5) sudo systemctl restart ssh - перезапуск службы SSH.
                 Если не конфиг не применился: sudo systemctl daemon-reload && sudo systemctl restart ssh.socket
+NFTables
+---
+sudo nano /etc/nftables.conf - файл для создания и изменения nftables.
+Базовая настройка: 
+
+        #!/usr/sbin/nft -f
+        
+        # Удалить все таблицы flush ruleset.
+        # Удаляем только свою таблицу, чтобы не сломать правила Docker при перезагрузке.
+        add table inet custom_firewall
+        delete table inet custom_firewall
+        
+        table inet custom_firewall {
+                # Создаем динамический список для забаненных IPv4 адресов
+                set blacklist_v4 {
+                        type ipv4_addr
+                        flags dynamic,timeout
+                        timeout 15m # Время бана: 15 минут
+                }
+        
+                # Отдельный список для учета скорости попыток входа (чтобы не забанить себя случайно)
+                set ssh_ratelimit {
+                        type ipv4_addr
+                        flags dynamic, timeout
+                        timeout 1m
+                }
+        
+                chain input {
+                        type filter hook input priority filter; policy drop;
+        
+                        # 1. Сразу отбрасываем всех, кто уже в черном списке, без логов, чтобы не спамить.
+                        ip saddr @blacklist_v4 drop
+        
+                        # 2. Базовые системные правила
+                        # Разрешаем локальный интерфейс
+                        iif "lo" accept
+                        # Разрешаем уже установленные соединения
+                        ct state established,related accept
+                        # Отбрасываем некорректные пакеты
+                        ct state invalid drop
+        
+                        # 3. Разрешаем ping и служебный трафик IPv6
+                        ip protocol icmp accept
+                        ip6 nexthdr ipv6-icmp accept
+        
+                        # 4. Ловушка для SSH (порт 2222)
+                        # Пишем в лог не чаще 5 раз в минуту, добавляем в бан и отбрасываем пакет
+                        tcp dport 2222 ct state new add @ssh_ratelimit { ip saddr limit rate over 4/minute } \
+                                limit rate 5/minute log prefix "NFT_SSH_BAN: " \
+                                add @blacklist_v4 { ip saddr } drop
+        
+                        # 5. Разрешаем легитимный SSH и веб-трафик
+                        tcp dport 2222 accept
+                        tcp dport { 80, 443 } accept
+        
+                        # 6. Молча отбрасываем локальный шум (mDNS, NetBIOS, широковещательный трафик) без записи в лог
+                        pkttype { broadcast, multicast } drop
+        
+                        # 7. Логируем всё остальное, что дошло до конца цепочки и сейчас умрет по policy drop
+                        limit rate 5/minute log prefix "NFT_DROP_OTHER: "
+                }
+        
+                # Защита Docker (приоритет -10, выполняется ДО правил Docker)
+                chain docker_guard {
+                        type filter hook forward priority -10; policy accept;
+        
+                        # 1. Пропускаем ответный трафик для уже открытых сессий (чтобы контейнеры могли ходить в интернет)
+                        ct state established,related accept
+        
+                        # 2. Если пакет пришел с внешнего интерфейса (eth0) и идет в подсеть Docker (обычно 172.16.0.0/12)
+                        iifname "ens33" ip daddr 172.16.0.0/12 jump docker_rules
+                }
+        
+                # Отдельная цепочка с правилами доступа к контейнерам
+                chain docker_rules {
+                        # ЗАМЕНИТЬ НА СВОЙ ИНТЕРФЕЙС (ip -br a)
+                        # Разрешаем доступ к контейнерам только с доверенного IP
+                        ip saddr 192.168.37.1 accept
+        
+                        # Всё остальное, что пришло извне в контейнеры режем
+                        drop
+                }
+        
+                chain output {
+                        type filter hook output priority filter; policy accept;
+                }
+        }
+
+
         
 SCP
 ---
