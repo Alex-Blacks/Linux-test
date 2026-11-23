@@ -464,7 +464,43 @@ ssh -D 1080 user@192.168.1.1 — создание локального SOCKS5-п
                 Если не конфиг не применился: sudo systemctl daemon-reload && sudo systemctl restart ssh.socket
 NFTables
 ---
-sudo nano /etc/nftables.conf - файл для создания и изменения nftables.
+sudo apt update && sudo apt install nftables -y - Установить nftables
+
+sudo systemctl enable --now nftables - включить автозагрузку службы
+
+sudo systemctl disable --now ufw 2>/dev/null || true - Отключить старый UFW (чтобы не конфликтовал)
+
+sudo nft -c -f /etc/nftables.conf - Проверить синтаксис файла перед применением (без запуска)
+
+sudo nft -f /etc/nftables.conf - Применить конфигурацию из файла
+
+sudo nft -f /etc/nftables.conf && sleep 60 && sudo nft delete table inet custom_firewall - Безопасный запуск со сбросом через 60 секунд (защита от потери SSH при ошибке)
+
+sudo nft list ruleset - Посмотреть все активные правила в ядре
+
+sudo nft -a list chain inet custom_firewall input - Посмотреть правила конкретной цепочки с их ID (`handle`)
+
+sudo nft list set inet custom_firewall blacklist_v4 - Посмотреть список забаненных IP и остаток времени бана
+
+sudo journalctl -k -n 0 -f | grep "NFT_" - Читать логи срабатываний в реальном времени
+
+*Внимание: изменения через `add`/`delete` работают сразу в памяти, но пропадут после перезагрузки, если не вписать их в `/etc/nftables.conf`.*
+
+sudo nft add element inet custom_firewall blacklist_v4 { 198.51.100.14 timeout 1h } - Забанить IP-адрес вручную (например, на 1 час)
+
+sudo nft delete element inet custom_firewall blacklist_v4 { 198.51.100.14 } - Разбанить IP-адрес досрочно
+
+sudo nft flush set inet custom_firewall blacklist_v4 - Очистить весь черный список целиком
+
+sudo nft add rule inet custom_firewall input tcp dport 8080 accept - Быстро открыть порт (добавить правило в конец цепочки `input`)
+
+sudo nft insert rule inet custom_firewall input ip saddr 203.0.113.50 drop - Быстро заблокировать IP (вставить правило в самое начало цепочки `input`)
+
+sudo nft delete rule inet custom_firewall input handle 15 - Удалить конкретное правило по его номеру `handle`
+
+sudo nft delete table inet custom_firewall - Полностью выключить фаервол (удалить нашу таблицу)
+
+sudo nano /etc/nftables.conf - файл для создания и изменения nftables
 Базовая настройка: 
 
         #!/usr/sbin/nft -f
