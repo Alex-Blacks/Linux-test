@@ -149,6 +149,7 @@ sudo chown -R root:alex file.txt
 sudo chmod -R 664 папка_или_файл
 ```
 * `-R` — рекурсивное изменение прав для папки и всего содержимого.
+  
 | Цифра | Права | Расшифровка |
 | :---: | :---: | :--- |
 | **7** | `rwx` | Полный доступ (чтение, запись, выполнение) |
@@ -169,7 +170,7 @@ sudo chgrp whales myfile
 
 **Поменять набор разрешений по умолчанию:**
 ```bash
-Umask
+umask
 ```
 
 ---
@@ -945,10 +946,10 @@ server {
 
     location / {
         proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
